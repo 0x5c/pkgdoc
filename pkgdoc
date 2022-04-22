@@ -1,0 +1,118 @@
+#!/bin/sh
+
+# Copyright (c) 2022 0x5c
+# SPDX-License-Identifier: MIT
+
+
+prefix="/usr/share"
+
+if [ -n "$NOCOLORS" ]; then
+    ls='ls --color=never'
+else
+    ls='ls --color=auto'
+fi
+
+usage() {
+    #echo "pkgdoc [-del] [PKG]"
+    #echo "A list of packages is printed if PKG is not provided"
+
+    cat <<-EOF
+	pkgdoc [-del] [PKG]
+
+	-d      show documentation
+	-e      show examples
+	-l      show licences
+	PKG     package to lookup 
+
+	If no option is selected, everything is shown.
+	A list of packages is printed if PKG is not provided.
+	EOF
+    
+    exit 0
+}
+
+section() {
+    if [ -n "$NOCOLORS" ]; then
+        printf "* %s\n" "$@"
+    else
+        printf "\033[1m* %s\033[m\n" "$@"
+    fi
+}
+
+blue() {
+    if [ -n "$NOCOLORS" ]; then
+        printf "* %s\n" "$@"
+    else
+        printf "\033[1;34m* %s\033[m\n" "$@"
+    fi
+}
+
+while getopts delh flag; do
+    case $flag in
+        d) LIST_DOCS=1 ;;
+        e) LIST_EXAMPLES=1 ;;
+        l) LIST_LICENCES=1 ;; 
+        h|?) usage ;;
+    esac
+done
+
+shift $((OPTIND - 1))
+
+# If no type is specified, defualt to show them all
+if [ -z "$LIST_DOCS" ] && [ -z "$LIST_EXAMPLES" ] && [ -z "$LIST_LICENCES" ]; then
+    LIST_DOCS=1
+    LIST_EXAMPLES=1
+    LIST_LICENCES=1
+fi
+
+# If no package is specified, list packages instead of files
+if [ "$#" -eq 0 ]; then
+    if [ -n "$LIST_DOCS" ]; then
+        section "Packages with documentation ($prefix/doc)"
+        $ls "$prefix/doc"
+    fi
+    if [ -n "$LIST_EXAMPLES" ]; then
+        section "Packages with examples ($prefix/examples)"
+        $ls "$prefix/examples"
+    fi
+    if [ -n "$LIST_LICENCES" ]; then
+        section "Packages with licences and generic licences ($prefix/licenses)"
+        $ls "$prefix/licenses"
+    fi
+    exit 0
+fi
+
+if [ -n "$LIST_DOCS" ]; then
+    docs="$prefix/doc/$1"
+    if [ -d "$docs" ]; then
+        section "Documentation for $1 ($docs)"
+        $ls "$docs"
+    else
+        blue "No documentation found for $1"
+    fi
+    echo
+fi
+
+if [ -n "$LIST_EXAMPLES" ]; then
+    examples="$prefix/examples/$1"
+    if [ -d "$examples" ]; then
+        section "Examples for $1 ($examples)"
+        $ls "$examples"
+    else
+        blue "No examples found for $1"
+    fi
+    echo
+fi
+
+if [ -n "$LIST_LICENCES" ]; then
+    licences="$prefix/licenses/$1"
+    if [ -d "$licences" ]; then
+        section "Licences for $1 ($licences)"
+        $ls "$licences"
+    else
+        blue "No licences found for $1"
+    fi
+    echo
+fi
+
+exit 0
