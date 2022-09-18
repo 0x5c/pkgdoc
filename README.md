@@ -18,7 +18,7 @@ A list of packages is printed if PKG is not provided.
 
 `$LS_COLORS` is used for the file listings.
 
-All colours are turned off when `$NOCOLORS` is set.
+All colours are turned off when [`$NO_COLOR`](https://no-color.org) is set.
 
 ## Licence
 
