@@ -1,0 +1,29 @@
+#!/bin/sh
+
+pkg=pkgdoc
+ver=1.0.2
+rev=1
+desc="Find documentation/examples/licences for packages"
+maintainer="0x5c <dev@0x5c.io>"
+license=MIT
+homepage="https://github.com/0x5c/pkgdoc"
+
+destdir=$(mktemp -d)
+
+bindir=$destdir/usr/bin
+licensedir=$destdir/usr/share/licenses/pkgdoc
+zshcompdir=$destdir/usr/share/zsh/site-functions
+
+mkdir -p $bindir $licensedir $zshcompdir
+cp pkgdoc $bindir
+cp LICENCE $licensedir
+cp completions/_pkgdoc.zsh $zshcompdir/_pkgdoc
+
+xbps-create \
+    --architecture noarch \
+    --pkgver "${pkg}-${ver}_${rev}" \
+    --desc "$desc" \
+    --maintainer "$maintainer" \
+    --license $license \
+    --homepage $homepage \
+    $destdir
